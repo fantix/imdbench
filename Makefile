@@ -377,3 +377,9 @@ run-planetscale:
 	$(BASE_RUNNER) --concurrency 16 --json docs/planetscale-16.json prisma
 	$(BASE_RUNNER) --concurrency 20 --json docs/planetscale-20.json prisma
 	$(PP) merge.py $(NAME) docs/planetscale-*.json > docs/planetscale.html
+
+
+.PHONY: apply
+apply:
+	terraform -chdir=terraform init
+	terraform -chdir=terraform apply -auto-approve

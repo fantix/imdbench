@@ -1,3 +1,25 @@
+Run the Cloud Benchmark
+#######################
+
+#. Create a `Vercel access token
+   <https://vercel.com/guides/how-do-i-use-a-vercel-api-access-token>`_
+   and keep it somewhere safe.
+
+#. Install `Terraform <https://learn.hashicorp.com/tutorials/terraform/install-cli>`_
+   and run:
+
+   .. code-block::
+
+      $ make apply
+
+   You'll be prompted to input the tokens you created previously. Alternatively,
+   you can set them as environment variables:
+
+   * `TF_VAR_vercel_api_token` (Required)
+   * `TF_VAR_vercel_team_slug`
+
+
+
 Run locally
 ###########
 
