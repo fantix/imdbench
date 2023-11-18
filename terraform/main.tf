@@ -7,6 +7,11 @@ terraform {
   }
 }
 
+variable "region" {
+  type    = string
+  default = "us-east-2"
+}
+
 variable "vercel_api_token" {
   type        = string
   nullable    = false
@@ -26,8 +31,11 @@ provider "vercel" {
 }
 
 resource "vercel_project" "imdbench" {
-  name      = "imdbench"
-  framework = "nextjs"
+  name                       = "imdbench"
+  framework                  = "nextjs"
+  serverless_function_region = lookup({
+    us-east-2 = "cle1"
+  }, var.region)
 }
 
 data "vercel_project_directory" "imdbench" {

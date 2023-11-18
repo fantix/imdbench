@@ -15,6 +15,7 @@ Run the Cloud Benchmark
    You'll be prompted to input the tokens you created previously. Alternatively,
    you can set them as environment variables:
 
+   * `TF_VAR_region` (Default: us-east-2)
    * `TF_VAR_vercel_api_token` (Required)
    * `TF_VAR_vercel_team_slug`
 
