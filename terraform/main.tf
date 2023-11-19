@@ -4,12 +4,65 @@ terraform {
       source  = "vercel/vercel"
       version = "~> 0.3"
     }
+    planetscale = {
+      source  = "planetscale/planetscale"
+      version = "~> 0.0.7"
+    }
   }
 }
 
 variable "region" {
   type    = string
   default = "us-east-2"
+}
+
+variable "pscale_service_token_name" {
+  type        = string
+  nullable    = false
+  sensitive   = true
+  description = "ID of the PlanetScale service token to use"
+}
+
+variable "pscale_service_token" {
+  type        = string
+  nullable    = false
+  sensitive   = true
+  description = "Secret for the service token"
+}
+
+variable "pscale_org" {
+  type     = string
+  nullable = false
+}
+
+provider "planetscale" {
+  service_token_name = var.pscale_service_token_name
+  service_token      = var.pscale_service_token
+}
+
+resource "planetscale_database" "imdbench" {
+  organization = var.pscale_org
+  name         = "imdbench"
+  plan         = "scaler_pro"
+  cluster_size = "PS_10"
+  region       = lookup({
+    us-east-2 = "aws-us-east-2"
+  }, var.region)
+}
+
+resource "planetscale_branch" "imdbench" {
+  organization  = var.pscale_org
+  database      = planetscale_database.imdbench.name
+  name          = "imdbench"
+  parent_branch = "main"
+  production    = true
+}
+
+resource "planetscale_password" "imdbench" {
+  organization = var.pscale_org
+  database     = planetscale_database.imdbench.name
+  branch       = planetscale_branch.imdbench.name
+  name         = "imdbench"
 }
 
 variable "vercel_api_token" {

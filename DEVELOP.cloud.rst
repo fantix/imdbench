@@ -5,6 +5,9 @@ Run the Cloud Benchmark
    <https://vercel.com/guides/how-do-i-use-a-vercel-api-access-token>`_
    and keep it somewhere safe.
 
+#. Create a `PlanetScale service token
+   <https://planetscale.com/docs/concepts/service-tokens>`_.
+
 #. Install `Terraform <https://learn.hashicorp.com/tutorials/terraform/install-cli>`_
    and run:
 
@@ -15,10 +18,17 @@ Run the Cloud Benchmark
    You'll be prompted to input the tokens you created previously. Alternatively,
    you can set them as environment variables:
 
-   * `TF_VAR_region` (Default: us-east-2)
-   * `TF_VAR_vercel_api_token` (Required)
-   * `TF_VAR_vercel_team_slug`
+   * `TF_VAR_region` (Optional, default: us-east-2)
+   * `TF_VAR_pscale_service_token_name`
+   * `TF_VAR_pscale_service_token`
+   * `TF_VAR_pscale_org`
+   * `TF_VAR_vercel_api_token`
+   * `TF_VAR_vercel_team_slug` (Optional)
 
+   Note, the Terraform provider of PlanetScale currently has issues that requires
+   manual intervention - the first `make apply` will likely fail and you'll need to
+   grant database accesses (all `database` and `branch`) to the previously created
+   token. The newly-created branch may also need some manual retries to be promoted.
 
 
 Run locally
