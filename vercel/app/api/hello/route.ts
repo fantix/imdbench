@@ -1,9 +1,14 @@
-export const runtime = 'edge';
-export const preferredRegion = 'home';
+import {pscale} from "@/app";
+
 export const dynamic = 'force-dynamic';
 
-export function GET(request: Request) {
-    return new Response(`I am an Edge Function!`, {
+interface QueryResult {
+    time: Date;
+}
+
+export async function GET(request: Request) {
+    let result = await pscale.$queryRaw<QueryResult[]>`SELECT now() as time`;
+    return new Response(`PlanetScale time: ${result[0].time}`, {
         status: 200,
     });
 }

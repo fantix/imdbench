@@ -99,9 +99,16 @@ resource "vercel_deployment" "imdbench" {
   project_id  = vercel_project.imdbench.id
   files       = data.vercel_project_directory.imdbench.files
   path_prefix = "../vercel"
-  production  = true
+  production  = false
+}
+
+resource "vercel_project_environment_variable" "imdbench" {
+  key        = "pscale_url"
+  project_id = vercel_project.imdbench.id
+  target     = ["preview", "production"]
+  value      = "mysql://${planetscale_password.imdbench.username}:${planetscale_password.imdbench.plaintext}@${planetscale_branch.imdbench.mysql_address}/${planetscale_database.imdbench.name}?sslaccept=strict"
 }
 
 output "vercel_url" {
-  value = vercel_deployment.imdbench.url
+  value = "https://${vercel_deployment.imdbench.url}/api/hello"
 }
