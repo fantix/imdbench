@@ -3,7 +3,7 @@ import {Prisma as PGPrisma, PrismaClient as PGClient} from '../prisma/generated/
 import {NextRequest} from "next/server";
 
 
-export function getPrisma(request: NextRequest) {
+export function getPrisma(request: NextRequest): [MySQLClient | PGClient, typeof MySQLPrisma | typeof PGPrisma] {
     let source = request.nextUrl.searchParams.get("source");
     switch (source) {
         case "pscale":

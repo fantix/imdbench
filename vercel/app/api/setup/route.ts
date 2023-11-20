@@ -8,7 +8,11 @@ export async function GET(request: NextRequest) {
     try {
         [client] = getPrisma(request);
     } catch (e) {
-        return NextResponse.json({msg: e.message}, {status: 400});
+        if (e instanceof Error) {
+            return NextResponse.json({msg: e.message}, {status: 400});
+        } else {
+            throw e;
+        }
     }
 
     let params = request.nextUrl.searchParams;
