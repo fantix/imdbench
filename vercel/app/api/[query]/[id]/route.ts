@@ -4,17 +4,7 @@ import {NextRequest, NextResponse} from "next/server";
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest, {params}: { params: { query: string, id: string } }) {
-  let client;
-  try {
-    [client] = getPrisma(request);
-  } catch (e) {
-    if (e instanceof Error) {
-      return NextResponse.json({msg: e.message}, {status: 400});
-    } else {
-      throw e;
-    }
-  }
-
+  let {client} = getPrisma(request);
   let id = parseInt(params.id);
 
   switch (params.query) {
