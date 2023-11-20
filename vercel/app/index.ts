@@ -3,7 +3,7 @@ import {Prisma as PGPrisma, PrismaClient as PGClient} from '../prisma/generated/
 import {NextRequest} from "next/server";
 
 
-export function getPrisma(request: NextRequest): [MySQLClient | PGClient, typeof MySQLPrisma | typeof PGPrisma] {
+export function getPrisma(request: NextRequest): [any, any] {
     let source = request.nextUrl.searchParams.get("source");
     switch (source) {
         case "pscale":
@@ -16,4 +16,15 @@ export function getPrisma(request: NextRequest): [MySQLClient | PGClient, typeof
             throw new Error(`invalid "source": ${source}`);
         }
     }
+}
+
+export function getFullName(person: any) {
+    let fn;
+    if (!person.middle_name) {
+        fn = `${person.first_name} ${person.last_name}`;
+    } else {
+        fn = `${person.first_name} ${person.middle_name} ${person.last_name}`;
+    }
+
+    return fn;
 }

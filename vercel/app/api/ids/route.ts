@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({msg}, {status: 400});
     }
 
-    let ids = await client.$queryRaw<[{ id: number }]>`
+    let ids: [{ id: number }] = await client.$queryRaw`
         SELECT id FROM ${Prisma.raw(table)} ORDER BY RAND() LIMIT ${number_of_ids}`
     return NextResponse.json(ids.map(obj => obj.id), {status: 200});
 }
