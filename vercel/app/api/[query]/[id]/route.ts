@@ -111,6 +111,66 @@ async function getMovie(client: any, id: number) {
   return NextResponse.json(result[0], {status: 200});
 }
 
+async function getUser(client: any, id: number) {
+  const result = await client.$transaction(async (prisma: any) => {
+    let result = await prisma.users.findUnique({
+      where: {
+        id: id,
+      },
+      select: {
+        id: true,
+        name: true,
+        image: true,
+        reviews: {
+          take: 10,
+          orderBy: {
+            creation_time: 'desc',
+          },
+          select: {
+            id: true,
+            body: true,
+            rating: true,
+            movie: {
+              select: {
+                id: true,
+                image: true,
+                title: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    let avgRatings = await prisma.reviews.groupBy({
+      by: ['movie_id'],
+      where: {
+        movie_id: {
+          in: result.reviews.map((r: any) => r.movie.id),
+        },
+      },
+      _avg: {
+        rating: true,
+      },
+    });
+
+    let avgRatingsMap: any = {};
+
+    for (let m of avgRatings) {
+      avgRatingsMap[m.movie_id] = m._avg.rating;
+    }
+
+    for (let r of result.reviews) {
+      r.movie.avg_rating = avgRatingsMap[r.movie.id];
+    }
+    result.latest_reviews = result.reviews;
+    delete result.reviews;
+    return result;
+  });
+
+  return NextResponse.json(result, {status: 200});
+}
+
 export async function GET(request: NextRequest, {params}: { params: { query: string, id: string } }) {
   let {client} = getPrisma(request);
   let id = parseInt(params.id);
@@ -118,6 +178,9 @@ export async function GET(request: NextRequest, {params}: { params: { query: str
   switch (params.query) {
     case "get_movie":
       return await getMovie(client, id);
+
+    case "get_user":
+      return await getUser(client, id);
 
     default:
       let msg = `invalid "query": ${params.query}`;
