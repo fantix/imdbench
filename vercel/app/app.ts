@@ -9,7 +9,7 @@ export class App {
     }
   }
 
-  async setupInsertMovie() {
+  async setupInsertMovie(number_of_ids: number) {
     let msg = "Not implemented";
     return NextResponse.json({msg}, {status: 501});
   }

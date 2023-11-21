@@ -1,4 +1,4 @@
-import {getApp} from "@/app";
+import {getApp, queries} from "@/app";
 import {NextRequest, NextResponse} from "next/server";
 
 export const dynamic = 'force-dynamic';
@@ -12,18 +12,9 @@ export async function GET(request: NextRequest, {params}: { params: { query: str
     return NextResponse.json({msg}, {status: 400});
   }
 
-  switch (params.query) {
-    case "insert_movie":
-      return await app.setupInsertMovie();
-
-    case "get_movie":
-      return await app.setupGetMovie(number_of_ids);
-
-    case "get_user":
-      return await app.setupGetUser(number_of_ids);
-
-    default:
-      let msg = `invalid "query": ${params.query}`;
-      return NextResponse.json({msg}, {status: 404});
+  for (const {slug, setup} of queries) {
+    if (params.query == slug) {
+      return await (app[setup] as any)(number_of_ids);
+    }
   }
 }

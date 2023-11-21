@@ -18,7 +18,7 @@ export class PrismaApp extends App {
     }
   }
 
-  async setupInsertMovie() {
+  async setupInsertMovie(number_of_ids: number) {
     await this.client.$executeRaw`
         DELETE D FROM
             directors as D
@@ -57,7 +57,7 @@ export class PrismaApp extends App {
         ORDER BY ${this.isPG ? 'random' : 'RAND'}() LIMIT 4
     `);
     let people = ids.map(x => x.id);
-    return NextResponse.json(Array(1000).fill({
+    return NextResponse.json(Array(number_of_ids).fill({
       prefix: 'insert_test__',
       people,
     }) as any, {status: 200});
