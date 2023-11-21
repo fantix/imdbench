@@ -110,5 +110,5 @@ resource "vercel_project_environment_variable" "imdbench" {
 }
 
 output "vercel_url" {
-  value = "https://${vercel_deployment.imdbench.url}/api/ids?source=pscale&table=users&limit=100"
+  value = "https://${vercel_deployment.imdbench.url}/"
 }
