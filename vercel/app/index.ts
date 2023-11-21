@@ -11,6 +11,13 @@ const settings = [
     factory: PrismaApp,
     env: "pscale_url",
   },
+  {
+    name: "AWS RDS with Prisma",
+    db: "rds",
+    app: "prisma",
+    factory: PrismaApp,
+    env: "rds_url",
+  },
 ]
 
 export function getApp(request: NextRequest): App {
@@ -31,4 +38,11 @@ export function getApp(request: NextRequest): App {
   } else {
     return rv;
   }
+}
+
+export function listSettings() {
+  return settings.map(function ({name, db, app, env}) {
+    let bootstrapped = env in process.env;
+    return {name, db, app, bootstrapped}
+  })
 }
