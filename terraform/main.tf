@@ -106,7 +106,7 @@ resource "vercel_project_environment_variable" "imdbench" {
   key        = "pscale_url"
   project_id = vercel_project.imdbench.id
   target     = ["preview", "production"]
-  value      = "mysql://${planetscale_password.imdbench.username}:${planetscale_password.imdbench.plaintext}@${planetscale_branch.imdbench.mysql_address}/${planetscale_database.imdbench.name}?sslaccept=strict"
+  value      = "mysql://${planetscale_password.imdbench.username}:${planetscale_password.imdbench.plaintext}@${planetscale_branch.imdbench.mysql_address}/${planetscale_database.imdbench.name}?sslaccept=strict&connection_limit=1"
 }
 
 output "vercel_url" {
