@@ -115,9 +115,9 @@ export default function Home() {
       </div>
       <div className="plans w-full">
         <p style={{display: "flex", alignItems: "center"}}>
-          <button onClick={run}>Run</button>
-          <button onClick={report}>Report</button>
-          <button onClick={deleteSelected}>Delete</button>
+          <button onClick={run} disabled={selected.length == 0}>Run</button>
+          <button onClick={report} disabled={selected.length == 0}>Report</button>
+          <button onClick={deleteSelected} disabled={selected.length == 0}>Delete</button>
           <span style={{flexGrow: 1}}></span>
           Order by:
           <input
@@ -150,15 +150,19 @@ export default function Home() {
             <td>Query</td>
             <td>Duration</td>
             <td>Concurrency</td>
-            <td>latency</td>
+            <td>Latency</td>
             <td>Throughput</td>
           </tr>
           </thead>
           <tbody>
           {
             plansList?.map((p: Plan, index: number) => (
-              <tr key={index}>
+              <tr key={index} className="progress-container">
                 <td>
+                  <div
+                    className="progress"
+                    style={{width: p.ran === undefined ? `${Math.random() * 100}%` : '100%'}}
+                  ></div>
                   <input
                     type="checkbox"
                     checked={selected.indexOf(p.id!, 0) > -1}
@@ -296,7 +300,11 @@ export default function Home() {
           </p>
           <p>
             <span className="grow"></span>
-            <button onClick={generate}>Generate plan</button>
+            <button
+              onClick={generate}
+              disabled={form.benchmarks.length == 0 && form.queries.length == 0}>
+              Generate plan
+            </button>
           </p>
         </div>
       </div>

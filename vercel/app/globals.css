@@ -65,6 +65,10 @@ button {
   padding: 5px 1em;
 }
 
+button[disabled] {
+  color: grey;
+}
+
 .plans table {
   width: 100%;
 }
@@ -76,4 +80,17 @@ button {
 
 .plans th {
   font-weight: bolder;
+}
+
+.progress-container {
+  position: relative;
+}
+
+.progress-container .progress {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(128, 128, 128, 0.5);
+  z-index: -1;
 }
