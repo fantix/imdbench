@@ -12,9 +12,6 @@ export async function GET(request: NextRequest, {params}: { params: { query: str
     return NextResponse.json({msg}, {status: 400});
   }
 
-  for (const {slug, setup} of queries) {
-    if (params.query == slug) {
-      return await (app[setup] as any)(number_of_ids);
-    }
-  }
+  const {setup} = queries[params.query as keyof typeof queries];
+  return await (app[setup] as any)(number_of_ids);
 }

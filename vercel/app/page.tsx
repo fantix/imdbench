@@ -237,7 +237,7 @@ export default function Home() {
         </ul>
         <ul className="box">
           Queries:
-          {queries.map(({slug}) => (
+          {Object.keys(queries).map(slug => (
             <li key={slug}>
               <input
                 type="checkbox"

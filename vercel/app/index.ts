@@ -19,26 +19,23 @@ const settings = [
     env: "rds_url",
   },
 ]
-export const queries = [
-  {
-    slug: "insert_movie",
+export const queries = {
+  insert_movie: {
     setup: "setupInsertMovie" as keyof App,
     run: "insertMovie" as keyof App,
     method: "post",
   },
-  {
-    slug: "get_movie",
+  get_movie: {
     setup: "setupGetMovie" as keyof App,
     run: "getMovie" as keyof App,
     method: "get",
   },
-  {
-    slug: "get_user",
+  get_user: {
     setup: "setupGetUser" as keyof App,
     run: "getUser" as keyof App,
     method: "get",
   },
-]
+}
 
 export function getApp(request: NextRequest): App {
   const params = request.nextUrl.searchParams;
