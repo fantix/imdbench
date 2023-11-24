@@ -20,7 +20,7 @@ export default function Home() {
     queries: string[],
   }>({
     warmUp: 5,
-    duration: 60,
+    duration: 10,
     concurrencyStr: "1,2,4,8",
     benchmarks: [],
     queries: [],

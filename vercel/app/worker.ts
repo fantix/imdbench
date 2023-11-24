@@ -10,15 +10,8 @@ addEventListener('message', async (event: MessageEvent<{ ci: number, ids: any[],
   const body = JSON.stringify(ids[0]);
   const timeout = 2_000;
   const latencyStats = new Float64Array(timeout * 100);
-  let minLatency = Infinity;
-  let maxLatency = 0.0;
-  let i = Math.floor((ids.length / plan.concurrency) * ci) % ids.length;
-  const startTime = performance.now();
-  let lastTime = startTime;
-  let lastProgress = startTime;
-  let now = startTime;
-  const duration = plan.duration * 1_000;
-  do {
+
+  async function run(i: number) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
     let resp;
@@ -35,7 +28,25 @@ addEventListener('message', async (event: MessageEvent<{ ci: number, ids: any[],
     }
     await resp.json();
     clearTimeout(timeoutId);
+  }
 
+  if (plan.warmUp > 0) {
+    const startTime = performance.now();
+    do {
+      await run(0);
+    } while (performance.now() - startTime < plan.warmUp * 1000);
+  }
+
+  const duration = plan.duration * 1_000;
+  let minLatency = Infinity;
+  let maxLatency = 0.0;
+  let i = Math.floor((ids.length / plan.concurrency) * ci) % ids.length;
+  const startTime = performance.now();
+  let lastTime = startTime;
+  let lastProgress = startTime;
+  let now = startTime;
+  do {
+    await run(i);
     now = performance.now();
     const reqTime = now - lastTime;
     latencyStats[Math.min(latencyStats.length - 1, Math.round(reqTime * 100))] += 1;
