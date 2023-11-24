@@ -380,7 +380,7 @@ export default function Home() {
             <span className="grow"></span>
             <button
               onClick={generate}
-              disabled={form.benchmarks.length == 0 && form.queries.length == 0}>
+              disabled={form.benchmarks.length == 0 || form.queries.length == 0}>
               Generate plan
             </button>
           </p>

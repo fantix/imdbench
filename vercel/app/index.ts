@@ -5,6 +5,13 @@ import {App} from "@/app/app";
 let clients: { [key: string]: App } = {};
 const settings = [
   {
+    name: "EdgeDB with edgedb-js",
+    db: "edgedb",
+    app: "edgedb_js",
+    factory: PrismaApp,
+    env: "edgedb_url",
+  },
+  {
     name: "PlanetScale with Prisma",
     db: "pscale",
     app: "prisma",
@@ -12,11 +19,25 @@ const settings = [
     env: "pscale_url",
   },
   {
-    name: "AWS RDS with Prisma",
-    db: "rds",
+    name: "Supabase with Prisma",
+    db: "supabase",
     app: "prisma",
     factory: PrismaApp,
-    env: "rds_url",
+    env: "supabase_url",
+  },
+  {
+    name: "Neon with Prisma",
+    db: "neon",
+    app: "prisma",
+    factory: PrismaApp,
+    env: "neon_url",
+  },
+  {
+    name: "Vercel Postgres with Prisma",
+    db: "vercelpg",
+    app: "prisma",
+    factory: PrismaApp,
+    env: "vercelpg_url",
   },
 ]
 export const queries = {
