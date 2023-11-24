@@ -2,9 +2,10 @@
 
 import Image from 'next/image'
 import {listSettings, queries} from "@/app";
-import React from "react";
+import React, {useState} from "react";
 import {useLiveQuery} from "dexie-react-hooks";
 import {idb, Plan} from "@/db/db.model";
+import {Message, MessageType} from "@/app/shared";
 
 export default function Home() {
   const settings = listSettings();
@@ -75,18 +76,95 @@ export default function Home() {
     }
   }, [form]);
 
-  const run = React.useCallback(async () => {
-    for (const plan of plansList ?? []) {
-      if (selected.indexOf(plan.id!, 0) > -1) {
-        idb.plans.update(
-          plan.id!,
-          {
-            ran: new Date(),
-            latency: 0,
-            throughput: 0,
-          }
-        );
+  const [running, setRunning] = useState({id: 0, progress: 0});
+
+  async function runPlan(plan: Plan) {
+    let progress = 0;
+    const setupProgress = 0.15;
+    const totalProgress = (setupProgress + plan.concurrency) / 100;
+
+    function incrProgress(val: number) {
+      progress += val;
+      setRunning({id: plan.id!, progress: Math.min(100, Math.round(progress / totalProgress))});
+    }
+
+    incrProgress(0);
+    const resp = await fetch(`/api/${plan.query}/setup?db=${plan.db}&app=${plan.app}&limit=10`);
+    const ids = await resp.json();
+    incrProgress(setupProgress);
+
+    let workers: Worker[] = [];
+    const done = new Promise((resolve, reject) => {
+      const timeout = 2_000;
+      const latencyStats = new Float64Array(timeout * 100);
+      let minLatency = Infinity;
+      let maxLatency = 0.0;
+      let doneCount = 0;
+      Array.from(Array(plan.concurrency).keys()).forEach(ci => {
+          const worker = new Worker(new URL("./worker.ts", import.meta.url));
+          workers.push(worker);
+          worker.onmessage = (e: MessageEvent<Message>) => {
+            switch (e.data.type) {
+              case MessageType.Done:
+                doneCount += 1;
+                minLatency = Math.min(minLatency, e.data.data.minLatency);
+                maxLatency = Math.max(maxLatency, e.data.data.maxLatency);
+                for (let i = 0; i < latencyStats.length; i++) {
+                  latencyStats[i] += e.data.data.latencyStats[i];
+                }
+                if (doneCount == plan.concurrency) {
+                  const [nqueries, weightedSum] = latencyStats.reduce(
+                    ([s, n], x, i) => [s + x, n + i * x],
+                    [0, 0],
+                  );
+                  resolve({
+                    latency: Math.round(weightedSum / nqueries / 100),
+                    throughput: Math.round(nqueries / plan.duration),
+                  });
+                }
+                break;
+
+              case MessageType.Progress:
+                incrProgress(e.data.data);
+                break;
+            }
+          };
+          worker.onerror = (e: ErrorEvent) => {
+            reject(e);
+          };
+          worker.onmessageerror = (e: MessageEvent) => {
+            reject(e);
+          };
+          worker.postMessage({ci, ids, plan});
+        }
+      );
+    });
+    let result: any;
+    try {
+      result = await done;
+    } finally {
+      for (const worker of workers) {
+        worker.terminate();
       }
+    }
+    await idb.plans.update(
+      plan.id!,
+      {
+        ran: new Date(),
+        ...result,
+      }
+    );
+  }
+
+  const run = React.useCallback(async () => {
+    try {
+      for (const plan of plansList ?? []) {
+        if (selected.indexOf(plan.id!, 0) > -1) {
+          await runPlan(plan);
+        }
+      }
+    } finally {
+      setRunning({id: 0, progress: 0});
     }
   }, [selected, plansList]);
 
@@ -115,9 +193,9 @@ export default function Home() {
       </div>
       <div className="plans w-full">
         <p style={{display: "flex", alignItems: "center"}}>
-          <button onClick={run} disabled={selected.length == 0}>Run</button>
+          <button onClick={run} disabled={running.id > 0 || selected.length == 0}>Run</button>
           <button onClick={report} disabled={selected.length == 0}>Report</button>
-          <button onClick={deleteSelected} disabled={selected.length == 0}>Delete</button>
+          <button onClick={deleteSelected} disabled={running.id > 0 || selected.length == 0}>Delete</button>
           <span style={{flexGrow: 1}}></span>
           Order by:
           <input
@@ -161,7 +239,7 @@ export default function Home() {
                 <td>
                   <div
                     className="progress"
-                    style={{width: p.ran === undefined ? `${Math.random() * 100}%` : '100%'}}
+                    style={{width: running.id == p.id ? `${running.progress}%` : p.ran === undefined ? '0' : '100%'}}
                   ></div>
                   <input
                     type="checkbox"
@@ -200,7 +278,7 @@ export default function Home() {
                 <td>{p.query}</td>
                 <td>{p.duration}s</td>
                 <td>{p.concurrency}</td>
-                <td>{p.latency ?? '-'}</td>
+                <td>{p.latency === undefined ? '-' : `${p.latency}ms`}</td>
                 <td>{p.throughput ?? '-'}</td>
               </tr>
             ))
